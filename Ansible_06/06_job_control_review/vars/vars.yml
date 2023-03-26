@@ -1,0 +1,20 @@
+---
+min_ram_mb: 512
+packages:
+  - httpd
+  - mod_ssl
+  - firewalld
+services:
+  - httpd
+  - firewalld
+ssl_path:
+  - /etc/pki/tls/certs
+  - /etc/pki/tls/private
+keyfile:
+  - src: files/localhost.crt
+    dest: /etc/pki/tls/certs/localhost.crt
+  - src: files/localhost.key
+    dest: /etc/pki/tls/private/localhost.key
+fw_svc:
+  - http
+  - https

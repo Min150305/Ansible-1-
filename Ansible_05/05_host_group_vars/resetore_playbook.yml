@@ -1,0 +1,14 @@
+---
+- name: Restore
+  hosts: all
+  tasks:
+    - name:
+      yum:
+        name:
+          - mutt
+          - nginx
+          - httpd
+        state: absent
+        
+
+

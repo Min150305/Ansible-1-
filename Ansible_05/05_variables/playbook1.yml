@@ -1,0 +1,56 @@
+---
+- name: Deploy and start Apache httpd Service
+  hosts: webserver
+  gather_facts: no 
+  vars:
+    pkg_http: httpd
+    pkg_https: mod_ssl
+    pkg_fw: firewalld
+    pkg_python: python3-PyMySQL
+    svc_web: httpd
+    svc_fw: firewalld
+    fw_http: http
+    fw_https: https
+  tasks:
+    # 1) 패키지 설치 - httpd, mod_ssl, python3-PyMySQL, firewalld
+    # 2) 서비스 설정 - /var/www/html/index.html
+    # 3) 서비스 실행 - httpd, firewalld
+    # 4) 방화벽 등록 - http, https
+    - name:
+      yum:
+        name:
+          - "{{ pkg_http }}"
+          - "{{ pkg_https }}"
+          - "{{ pkg_python }}"
+          - "{{ pkg_fw }}"
+        state: latest
+    
+    - name:
+      copy:
+        content: "<h1>Please Study hardly<h1>\n"
+        dest: /var/www/html/index.html
+        owner: ansible
+        group: ansible
+        mode: '755'
+
+    - name:
+      service:
+        name: "{{ item }}"
+        state: started
+        enabled: yes  
+      loop:
+        - "{{ svc_web }}"
+        - "{{ svc_fw }}"
+    - name:
+      firewalld:
+        service: "{{ item }}"
+        permanent: yes
+        immediate: yes
+        state: enabled
+      loop:
+        - "{{ fw_http }}"
+        - "{{ fw_https }}"
+
+
+
+  

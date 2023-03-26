@@ -1,0 +1,34 @@
+---
+- name: Test
+  hosts: lamp
+  vars:
+    firewall: firewalld
+  tasks:
+    - name:
+      include_tasks: tasks/main.yml
+
+    - name:
+      include_vars: vars/main.yml
+  
+    - name:
+      yum:
+        name: "{{ firewall }}"
+        state: latest
+    
+    - name:
+      service: 
+        name: "{{ firewall }}"
+        state: started
+        enabled: yes
+        
+    - name:
+      firewalld:
+        service: http
+        permanent: yes
+        state: enabled
+        immediate: yes
+    
+    - name:
+      copy:
+        content: "{{ ansible_hostname }}({{ ansible_default_ipv4.address}})"
+        dest: "{{ web_root }}/index.html"

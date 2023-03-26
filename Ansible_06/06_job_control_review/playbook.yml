@@ -1,0 +1,65 @@
+---
+- name: HTTPS 서버구축
+  hosts: webservers
+  gather_facts: yes
+  vars_files: vars/vars.yml
+  tasks:
+  # 1) 체크 - 배포판 종류, HW 사양점검
+  # 2) 패키지설치 - httpd, mod_ssl, firewalld
+  # 3) 서비스 기동 - httpd, firewalld
+  # 4) 웹서비스 설정 
+  # 4-0) 디렉토리 생성 - /etc/pki/tls/{private, certs}
+  # 4-1) TLS Key 배포 (files/localhst.*)
+  # * /etc/pki/tls/private/localhost.key
+  # * /etc/pki/tls/cert/localhost.crt
+  # 4-2) /var/www/html/index.html 파일생성
+  # 5) 방화벽에 등록 - http, https 
+
+    - name: 1) 체크 - 배포판 종류, HW 사양점검
+      fail:
+        msg: 실패! 
+      when: (ansible_distribution != "CentOS") or (ansible_memtotal_mb < min_ram_mb)
+    
+    - name: 2) 패키지설치 - httpd, mod_ssl, firewalld
+      yum:
+        name: "{{ packages }}"
+        state: present
+
+    - name: 3) 서비스 기동 - httpd, firewalld
+      service:
+        name: "{{ item }}"
+        state: started
+        enabled: yes
+      with_items: "{{ services }}"
+    
+    # 4) 웹서비스 설정 
+    # 4-0) 디렉토리 생성 - /etc/pki/tls/{private, certs}
+    - name: 4-0) 디렉토리 생성 - /etc/pki/tls/{private, certs}
+      file:
+        path: "{{ item }}"
+        state: directory
+      with_items: "{{ ssl_path }}"
+    # 4-1) TLS Key 배포 (files/localhst.*)
+    # * /etc/pki/tls/private/localhost.key
+    # * /etc/pki/tls/cert/localhost.crt
+    - name: 4-1) TLS Key 배포 (files/localhst.*)
+      copy:
+        src: "{{ item.src }}"
+        dest: "{{ item.dest }}"
+      with_items: "{{ keyfile }}"
+
+    # 4-2) /var/www/html/index.html 파일생성
+    - name: 4-2) /var/www/html/index.html 파일생성
+      copy:
+        src: files/index.html
+        dest: /var/www/html/index.html
+
+    # 5) 방화벽에 등록 - http, https 
+    - name: 5) 방화벽에 등록 - http, https 
+      firewalld:
+        service: "{{ item }}"
+        state: enabled
+        permanent: yes
+        immediate: yes
+      with_items: "{{ fw_svc }}"
+        

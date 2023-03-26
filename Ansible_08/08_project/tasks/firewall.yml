@@ -1,0 +1,19 @@
+---
+- name: 패키지 설치 {{ pkg_fw }}
+  yum:
+    name: "{{ pkg_fw }}"
+    state: present
+
+- name: 서비스 기동
+  service:
+    name: "{{ svc_fw }}"
+    state: started
+    enabled: yes
+
+- name: 방화벽 등록  {{ fw_services }}
+  firewalld:
+    service: "{{ item }}"
+    permanent: yes
+    state: enabled
+    immediate: yes
+  with_items: "{{ fw_services }}"

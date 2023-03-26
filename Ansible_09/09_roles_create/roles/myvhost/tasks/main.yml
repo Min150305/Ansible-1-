@@ -1,0 +1,39 @@
+---
+# tasks file for myvhost
+# 1) 패키지 설치 - httpd
+# 2) 서비스 기동 - httpd
+# 3) 서비스 설정 - /etc/httpd/conf.d
+# * vhost.conf.j2 -> /etc/httpd/conf.d/vhost.conf 
+# * notify ~ handlers
+# 4) 서비스 디렉토리 생성 - /var/www/vhosts/ansible1
+# 5) /var/www/vhosts/ansible1/index.html 파일 생성 
+
+- name: 패키지 설치 - httpd
+  yum:
+    name: httpd
+    state: present
+
+- name: 서비스 기동 
+  service:
+    name: httpd
+    state: started
+    enabled: yes  
+
+- name: 서비스 설정 
+  template:
+    src: vhost.conf.j2
+    dest: /etc/httpd/conf.d/vhost.conf
+  notify: 
+    - restart httpd
+
+- name: 디렉토리 생성  /var/www/vhosts/{{ ansible_hostname }}
+  file:
+    path: "/var/www/vhosts/{{ ansible_hostname }}"
+    state: directory
+
+- name: 파일생성 - /var/ww/vhosts/{{ ansible_hostname }}/index.html
+  copy:
+    content: 'Hello And Good Bye - ansible 1'
+    dest: /var/www/vhosts/{{ ansible_hostname }}/index.html
+
+

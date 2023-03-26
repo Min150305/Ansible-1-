@@ -1,0 +1,11 @@
+---
+- name: 패키지 설치 - {{ pkg_webs }}
+  yum:
+    name: "{{ pkg_webs }}"
+    state: present
+
+- name: 
+  service:
+    name: "{{ svc_web }}"
+    state: started
+    enabled: yes

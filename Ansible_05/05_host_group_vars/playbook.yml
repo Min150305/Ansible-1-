@@ -1,0 +1,9 @@
+---
+- name: 변수순위 테스트 1번
+  hosts: all
+  gather_facts: no 
+  tasks: 
+    - name: Install the {{ package }} package
+      yum:
+        name: "{{ package }}"
+        state: latest

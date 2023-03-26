@@ -1,0 +1,10 @@
+---
+- name: Hosts 배포
+  hosts: all
+  gather_facts: yes
+  tasks:
+    - name: host배포
+      template:
+        src: files/hosts.j2
+        dest: /root/hosts
+        
